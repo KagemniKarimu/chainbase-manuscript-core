@@ -2,7 +2,6 @@ package commands
 
 import (
 	"fmt"
-	"io"
 	"log"
 	"manuscript-core/pkg"
 	"os"
@@ -26,7 +25,10 @@ func DeployManuscript(args []string) {
 		name string
 		fn   func() error
 	}{
-		{"Step 1: Parsing manuscript yaml", func() error {
+		{"Step 1: Validating manuscript file", func() error {
+			return validateManuscriptFile(manuscriptPath)
+		}},
+		{"Step 2: Parsing manuscript yaml", func() error {
 			var err error
 			ms, err = ParseManuscriptYaml(manuscriptPath)
 			if err != nil {
@@ -64,20 +66,20 @@ func DeployManuscript(args []string) {
 			}
 			return nil
 		}},
-		{"Step 2: Verifying Port Initialization", func() error { return pkg.InitializePorts(&ms) }},
-		{"Step 3: Checking manuscript is already deployed", func() error {
+		{"Step 3: Verifying Port Initialization", func() error { return pkg.InitializePorts(&ms) }},
+		{"Step 4: Checking manuscript is already deployed", func() error {
 			err := CheckManuscriptExist(ms)
 			if err != nil {
 				return err
 			}
 			return nil
 		}},
-		{"Step 4: Create Directory", func() error { return createDirectory(manuscriptDir) }},
-		{"Step 5: Create ManuscriptFile", func() error { return copyManuscriptFile(manuscriptDir, manuscriptPath) }},
-		{"Step 6: Create DockerComposeFile", func() error { return createDockerComposeFile(manuscriptDir, &ms) }},
-		{"Step 7: Check Docker Installed", func() error { return checkDockerInstalled() }},
-		{"Step 8: Start Docker Containers", func() error { return startDockerContainers(manuscriptDir) }},
-		{"Step 9: Check Container Status", func() error { return checkContainerStatus(&ms) }},
+		{"Step 5: Create Directory", func() error { return createDirectory(manuscriptDir) }},
+		{"Step 6: Create ManuscriptFile", func() error { return copyManuscriptFile(manuscriptDir, manuscriptPath) }},
+		{"Step 7: Create DockerComposeFile", func() error { return createDockerComposeFile(manuscriptDir, &ms) }},
+		{"Step 8: Check Docker Installed", func() error { return checkDockerInstalled() }},
+		{"Step 9: Start Docker Containers", func() error { return startDockerContainers(manuscriptDir) }},
+		{"Step 10: Check Container Status", func() error { return checkContainerStatus(&ms) }},
 	}
 
 	for _, step := range steps {
@@ -102,29 +104,31 @@ func DeployManuscript(args []string) {
 }
 
 func copyManuscriptFile(manuscriptDir, manuscriptPath string) error {
+	// First read the entire source file
+	content, err := os.ReadFile(manuscriptPath)
+	if err != nil {
+		return fmt.Errorf("failed to read source file: %w", err)
+	}
+
+	// Validate content
+	if len(content) == 0 {
+		return fmt.Errorf("source manuscript file is empty")
+	}
+
+	// Get destination path
 	_, fileName := filepath.Split(manuscriptPath)
 	destinationPath := filepath.Join(manuscriptDir, fileName)
 
-	sourceFile, err := os.Open(manuscriptPath)
-	if err != nil {
-		return fmt.Errorf("failed to open source file: %w", err)
-	}
-	defer sourceFile.Close()
-
-	destFile, err := os.Create(destinationPath)
-	if err != nil {
-		return fmt.Errorf("failed to create destination file: %w", err)
-	}
-	defer destFile.Close()
-
-	_, err = io.Copy(destFile, sourceFile)
-	if err != nil {
-		return fmt.Errorf("failed to copy file content: %w", err)
+	// Write the content atomically
+	tempFile := destinationPath + ".tmp"
+	if err := os.WriteFile(tempFile, content, 0644); err != nil {
+		return fmt.Errorf("failed to write temporary file: %w", err)
 	}
 
-	err = destFile.Sync()
-	if err != nil {
-		return fmt.Errorf("failed to sync destination file: %w", err)
+	// Rename temp file to final destination (atomic operation)
+	if err := os.Rename(tempFile, destinationPath); err != nil {
+		os.Remove(tempFile) // Clean up temp file if rename fails
+		return fmt.Errorf("failed to rename temporary file: %w", err)
 	}
 
 	return nil
@@ -151,6 +155,17 @@ func CheckManuscriptExist(ms pkg.Manuscript) error {
 		if d.Name == fmt.Sprintf("%s-jobmanager-1", ms.Name) {
 			return fmt.Errorf("error: Manuscript [ %s ] already deployed, please change the name in the manuscript yaml file", ms.Name)
 		}
+	}
+	return nil
+}
+
+func validateManuscriptFile(path string) error {
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return fmt.Errorf("failed to read manuscript file: %w", err)
+	}
+	if len(content) == 0 {
+		return fmt.Errorf("manuscript file is empty")
 	}
 	return nil
 }
