@@ -9,11 +9,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Define global CLI variables
 var (
 	env     string
 	version = "1.1.0"
 )
 
+// Execute runs the CLI commands
 func Execute(args []string) error {
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
@@ -22,6 +24,12 @@ func Execute(args []string) error {
 	return nil
 }
 
+// Manuscript CLI commands
+// Each command has a short description, long description, and example usage
+// Commands are grouped logically and added to the root command by addCommands()
+// Flags are added to commands as needed by configureFlags()
+
+// `init` command creates a new manuscript project
 var initCmd = &cobra.Command{
 	Use:     "init",
 	Aliases: []string{"ini", "in", "i"},
@@ -48,6 +56,7 @@ You'll be prompted to select:
 	},
 }
 
+// `list` command lists all manuscript jobs
 var jobListCmd = &cobra.Command{
 	Use:     "list [directory]",
 	Aliases: []string{"ls"},
@@ -89,6 +98,7 @@ Usage:
 	},
 }
 
+// `stop` command stops a manuscript job's containers from
 var jobStopCmd = &cobra.Command{
 	Use:   "stop <job_name>",
 	Short: "Stop a manuscript job",
@@ -108,6 +118,7 @@ Note: Restart jobs using 'deploy' command`,
 	},
 }
 
+// `logs` command shows logs of a manuscript job
 var jobLogsCmd = &cobra.Command{
 	Use:   "logs <job_name>",
 	Short: "View logs of a manuscript job",
@@ -125,6 +136,8 @@ Shows:
 		JobLogs(args[0])
 	},
 }
+
+// `chat` command gives Text-to-SQL chat interface with the dataset AI
 var chatCmd = &cobra.Command{
 	Use:     "chat <job_name>",
 	Aliases: []string{"c"},
@@ -155,6 +168,7 @@ Required Env Vars:
 	},
 }
 
+// `deploy` command deploys an existing manuscript.yaml file
 var deployManuscript = &cobra.Command{
 	Use:     "deploy <manuscript-file>",
 	Aliases: []string{"d"},
@@ -192,6 +206,7 @@ Requirements:
 	},
 }
 
+// `version` command shows the version of manuscript-cli
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Show the version of manuscript-cli",
@@ -217,6 +232,17 @@ func init() {
 	cobra.EnableCommandSorting = false
 
 	// Add CLI commands in logical groups
+	addCommands()
+
+	// Add flags to commands
+	configureFlags()
+
+	// Disable the default completion command
+	rootCmd.CompletionOptions.HiddenDefaultCmd = true
+}
+
+func addCommands() {
+
 	// Manuscript creation & deployment commands
 	rootCmd.AddCommand(initCmd)
 	rootCmd.AddCommand(deployManuscript)
@@ -232,15 +258,15 @@ func init() {
 	// Utility commands
 	rootCmd.AddCommand(versionCmd)
 
+}
+
+func configureFlags() {
 	// Configure deployment flags
 	deployManuscript.Flags().StringVar(&env, "env", "", "Specify the environment to deploy (local or chainbase)")
 	deployManuscript.MarkFlagRequired("env")
 
 	// Configure version command flags
 	versionCmd.Flags().BoolP("verbose", "v", false, "Display detailed version information")
-
-	// Disable the default completion command
-	rootCmd.CompletionOptions.HiddenDefaultCmd = true
 }
 
 var rootCmd = &cobra.Command{
