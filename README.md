@@ -48,10 +48,27 @@ The vision of Manuscript is to realize “data trade” within the Chainbase net
 
 ## Getting Started 🏄
 ### Install Manuscript Client
+You may choose to run any client or compile from the source code:
 ```shell
 # GUI
 curl -fsSL  https://github.com/chainbase-labs/manuscript-core/raw/main/install-gui.sh | bash
+
+# CUI
+curl -fsSL  https://github.com/chainbase-labs/manuscript-core/raw/main/install.sh | bash
+
+# or make
+➜  manuscript-core git:(main) ✗ make
+Available targets:
+  🔧 all           - Build both CLI and GUI
+  🐹 cli           - Build only the CLI
+  🦀 gui           - Build only the GUI
+  🧹 clean         - Clean build artifacts
+  🧪 test          - Run tests for both projects
+  📦 install       - Install both binaries to /usr/local/bin
+  📦 install-cli   - Install only the CLI binary to /usr/local/bin
+  📦 install-gui   - Install only the GUI binary to /usr/local/bin
 ```
+
 ### GUI
 ![manuscript-gui](./images/manuscript_gui_1.jpg)
 
@@ -73,6 +90,9 @@ Here's an example of how to <b>process</b> data from chainbase with manuscript:
 😆😆 data has never been so simple...
 
 ### Key Concepts
+Default location for the Manuscript configuration file:   `~/.manuscript_config.ini`  
+For local setups, data storage directory:  `~/manuscripts/<name>`  
+
 There are two primary objects:
 - `manuscript.yaml` - A script file used to describe the data processing workflow, defining data sources, data processing methods, and the final data flow direction.
 - `docker-compose.yaml` - The Docker Compose file defines a local container cluster environment, allowing developers to test locally. After testing, it can be deployed to the Chainbase distributed network.
@@ -132,12 +152,21 @@ Here are some of the planned improvements:
                 </a>
             </td>
             <td align="center">
+                <a href="https://github.com/youngpriince">
+                    <img src="https://avatars.githubusercontent.com/u/110453347?v=4" width="100;" alt="youngpriince"/>
+                    <br />
+                    <sub><b>ypszn</b></sub>
+                </a>
+            </td>
+            <td align="center">
                 <a href="https://github.com/AlanViast">
                     <img src="https://avatars.githubusercontent.com/u/9742385?v=4" width="100;" alt="AlanViast"/>
                     <br />
                     <sub><b>Alan Viast</b></sub>
                 </a>
             </td>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/nnsW3">
                     <img src="https://avatars.githubusercontent.com/u/146735585?v=4" width="100;" alt="nnsW3"/>
@@ -145,8 +174,6 @@ Here are some of the planned improvements:
                     <sub><b>Elias Rad</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
             <td align="center">
                 <a href="https://github.com/fishTsai20">
                     <img src="https://avatars.githubusercontent.com/u/123794723?v=4" width="100;" alt="fishTsai20"/>
@@ -162,10 +189,10 @@ Here are some of the planned improvements:
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/youngpriince">
-                    <img src="https://avatars.githubusercontent.com/u/110453347?v=4" width="100;" alt="youngpriince"/>
+                <a href="https://github.com/junyoungcross">
+                    <img src="https://avatars.githubusercontent.com/u/96804462?v=4" width="100;" alt="junyoungcross"/>
                     <br />
-                    <sub><b>ypszn</b></sub>
+                    <sub><b>김준영</b></sub>
                 </a>
             </td>
 		</tr>
